@@ -1,0 +1,41 @@
+/* General Swiper styles */
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+  }
+  
+  .image-holder img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  #goku-description {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  
+  /* Navigation buttons */
+  .icon-arrow {
+    position: absolute;
+    top: 50%;
+    width: 50px;
+    height: 50px;
+    fill: #333;
+    cursor: pointer;
+  }
+  
+  .icon-arrow-left {
+    left: 10px;
+  }
+  
+  .icon-arrow-right {
+    right: 10px;
+  }
+  
+  .swiper-pagination-bullet-active {
+    background-color: #333;
+  }
+  
