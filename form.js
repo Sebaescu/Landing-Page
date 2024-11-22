@@ -1,47 +1,69 @@
-document.getElementById('subscription-form').addEventListener('submit', function(event) {
-    event.preventDefault(); 
-    
-    const email = document.getElementById('email').value;
-    
-    const data = { email: email };
+const firebaseConfig = {
+    apiKey: "AIzaSyB424EdDEy8OExSMoSGvpOYk0QBkAfVM98",
+    authDomain: "landing-cbeeb.firebaseapp.com",
+    databaseURL: "https://landing-cbeeb-default-rtdb.firebaseio.com",
+    projectId: "landing-cbeeb",
+    storageBucket: "landing-cbeeb.firebasestorage.app",
+    messagingSenderId: "933016711630",
+    appId: "1:933016711630:web:c81332a907c59c05a8fb9f",
+    measurementId: "G-D80NVQZ1JS"
+};
 
-    fetch('https://tuservidor.com/api/subscribe', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json', 
-        },
-        body: JSON.stringify(data),  
-    })
-    .then(response => response.json()) 
-    .then(responseData => {
-        console.log('Respuesta del servidor:', responseData);
-        
-        alert('Te has suscrito correctamente al newsletter!');
-    })
-    .catch((error) => {
-        console.error('Error al enviar los datos:', error);
-        alert('Hubo un error al suscribirte. Intenta nuevamente.');
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const subscribersRef = database.ref('subscribers');
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('subscription-form');
+
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+
+            if (email) {
+                subscribersRef.push({ email })
+                    .then(() => {
+                        alert('¡Gracias por suscribirte!');
+                        document.getElementById('email').value = ''; 
+                    })
+                    .catch((error) => {
+                        console.error('Error al guardar el suscriptor:', error);
+                        alert('Hubo un problema al procesar tu suscripción.');
+                    });
+            } else {
+                alert('Por favor, ingresa un correo válido.');
+            }
+        });
+    } else {
+        console.error('Formulario de suscripción no encontrado.');
+    }
+
+    subscribersRef.limitToLast(5).on('value', (snapshot) => {
+        const subscribersList = document.getElementById('subscribers-list');
+        if (!subscribersList) {
+            console.error('Contenedor de suscriptores no encontrado.');
+            return;
+        }
+        subscribersList.innerHTML = ''; 
+
+        const subscribers = snapshot.val();
+        if (subscribers) {
+            const subscriberKeys = Object.keys(subscribers).reverse(); 
+            subscriberKeys.forEach((key) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item');
+                listItem.textContent = subscribers[key].email;
+                subscribersList.appendChild(listItem);
+            });
+        } else {
+            const emptyMessage = document.createElement('li');
+            emptyMessage.classList.add('list-group-item', 'text-muted');
+            emptyMessage.textContent = 'No hay suscriptores aún.';
+            subscribersList.appendChild(emptyMessage);
+        }
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('https://tuservidor.com/api/news') 
-        .then(response => response.json())
-        .then(data => {
-            const output = document.getElementById('data-output');
-            if (data && data.length > 0) {
-                let newsHTML = '<h3>Últimas Noticias</h3><ul>';
-                data.forEach(news => {
-                    newsHTML += `<li>${news.title}</li>`;  
-                });
-                newsHTML += '</ul>';
-                output.innerHTML = newsHTML;
-            } else {
-                output.innerHTML = '<p>No hay noticias disponibles.</p>';
-            }
-        })
-        .catch(error => {
-            console.error('Error al obtener las noticias:', error);
-            document.getElementById('data-output').innerHTML = '<p>Error al cargar las noticias.</p>';
-        });
-});
+console.log("Firebase inicializado correctamente:", firebase.apps.length > 0);
